@@ -242,9 +242,9 @@ function calculation(){ // для подсчёта начального сред
 
 function calcAverange(str){ // подсчёт среднего балла из получаемой строки (используется для инпута)
   str=str.replace(/ /g,'');
-  str1=str.replace(/,/g,'');
+  str1=str.replace(/,/g,'').replace(/\//g,'').replace(/0/g,'');
   for (let k = 0; k < str1.length; k++){
-    if(parseInt(str1[k],10)==NaN){
+    if(!parseInt(str1[k],10)){
       return NaN
     };
   };

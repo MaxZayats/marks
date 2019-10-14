@@ -1,14 +1,11 @@
-
 style=
 `
 <style>
-
 #mydiv {
     position: absolute;
     z-index: 9;
     text-align: center;
 }
-
 #mydivheader {
     padding: 10px;
     cursor: move;
@@ -16,7 +13,6 @@ style=
     background-color: #252F48;
     color: #EDB749;
 }
-
 .table_dark {
     font-family: "Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
     font-size: 14px;
@@ -46,7 +42,6 @@ style=
   .table_dark tr:hover td {
     text-decoration: underline;
   }
-
 #first{
     width: 80px;
 }  
@@ -55,9 +50,6 @@ style=
 }
 #third{
 }
-
-
-
 input{
     background-color:rgba(157, 22, 181, 0);
     border-color: rgba(157, 22, 181, 0);
@@ -65,7 +57,6 @@ input{
     width: 100%;
     font-size: 100%;
 }
-
 #restart{
   cursor:pointer;
   transition: .5s;
@@ -78,12 +69,10 @@ input{
 }
 #restart:hover{
   color: wheat;
-  top: -.8%;
   animation-delay: 0.1s;
   transition: .5s;
   transform: rotate(360deg);
 }
-
 </style>
 `
 
@@ -93,7 +82,6 @@ var body = String.raw`
         <h1>Журнал</h1>
     </div>
     <div id='restart'>↻</div>
-
   <table id='maintable' class="table_dark" style="width: 480px;">
         <tr id='names'>
           <th id='first'>Предмет</th>
@@ -106,8 +94,6 @@ var body = String.raw`
         </table>
 </div>
 <script>
-
-
 //перемещение элемента mydiv
 dragElement(document.getElementById(("mydiv")));
 function dragElement(elmnt) {
@@ -119,7 +105,6 @@ function dragElement(elmnt) {
     /* otherwise, move the DIV from anywhere inside the DIV:*/
     elmnt.onmousedown = dragMouseDown;
   }
-
   function dragMouseDown(e) {
     e = e || window.event;
     // get the mouse cursor position at startup:
@@ -129,7 +114,6 @@ function dragElement(elmnt) {
     // call a function whenever the cursor moves:
     document.onmousemove = elementDrag;
   }
-
   function elementDrag(e) {
     e = e || window.event;
     // calculate the new cursor position:
@@ -141,7 +125,6 @@ function dragElement(elmnt) {
     elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
     elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
   }
-
   function closeDragElement() {
     /* stop moving when mouse button is released:*/
     document.onmouseup = null;
@@ -151,11 +134,13 @@ function dragElement(elmnt) {
 //конец блока
 //-------------------------------
 
+
 //size
 $( function() {
     $( ".table_dark" ).resizable();
   } );
 //------------
+
 
 //основной код
 lessons=[
@@ -172,7 +157,6 @@ $('#restart').click(function(){
     lesson=$('span',selector)[0].innerHTML.replace(/ /g,'').replace(/\n/g,'');
     lesson=lesson.replace(lesson[0],'').replace(lesson[1],'');
     date=$(val).parent().parent().parent().parent().parent()[0].id.replace('db_table_','');
-
     for (let j = 0; j < lessons.length; j++) {
       if (lessons[j][0]==lesson && mark!==''){
         lessons[j][1].push([mark,date]);
@@ -189,13 +173,26 @@ $('#restart').click(function(){
   console.log(lessons); 
   lessons.sort();
   show();
+  
   $('.input').keyup(function(){ // обновление среднего балла
     value=String(calcAverange($(this).val()));
     id=String($(this).attr('id'));
-    document.getElementById(id).innerHTML=value;
-  });
+    
+    let val=$(this).val()[$(this).val().length-1];
 
+    if((!parseInt(val,10)) && (val !== '0') && (val !== ',') && (val !== ' ') && (val !== '/')){
+      $(this).val($(this).val().replace(val,''));
+      value=String(calcAverange($(this).val()));
+      console.log('delete',val);
+    }
+    document.getElementById(id).innerHTML=value;
+    if(!isNaN(calcAvrAvr())){
+      document.getElementById('Avr').innerHTML=calcAvrAvr();
+    }
+    
+  });
 });
+
 
 // структура ['предмет',[[оценки, дата]], србал]
 function calculation(){ // для подсчёта начального среднего балла *будет замена*
@@ -228,7 +225,6 @@ function calculation(){ // для подсчёта начального сред
         sum+=parseInt(lessons[i][1][j][0],10);
       }
     try{
-
       lessons[i][2]=(sum/n).toFixed(3);
       
     } 
@@ -242,7 +238,7 @@ function calculation(){ // для подсчёта начального сред
 
 function calcAverange(str){ // подсчёт среднего балла из получаемой строки (используется для инпута)
   str=str.replace(/ /g,'');
-  str1=str.replace(/,/g,'').replace(/\//g,'').replace(/0/g,'');
+  str1=str.replace(/,/g,'').replace(/\//g,'').replace(/0/g,''); //замена символов для проверки
   for (let k = 0; k < str1.length; k++){
     if(!parseInt(str1[k],10)){
       return NaN
@@ -278,7 +274,6 @@ function calcAverange(str){ // подсчёт среднего балла из �
       sum+=parseInt(str[j],10);
     }
   try{
-
     avr=(sum/n).toFixed(3);
     
   } 
@@ -290,6 +285,16 @@ function calcAverange(str){ // подсчёт среднего балла из �
 };
 
 
+// структура ['предмет',[[оценки, дата]], србал]
+function calcAvrAvr(){ // подсчет всего среднего бала
+  let sum=0;
+  for (let i = 1; i < lessons.length; i++) {  //в предметах
+    sum+=Math.round(document.getElementById(lessons[i][0]).innerHTML);
+  };
+  return (sum/(lessons.length-1)).toFixed(3)
+};
+
+
 function show(){ // вывод в таблицу
   for (let i = 1; i < lessons.length; i++) { //в предметах
     lessons[i][1].sort(function(a, b){ // сортировка массива по датам
@@ -297,13 +302,14 @@ function show(){ // вывод в таблицу
             bb = b[1].split('.').reverse().join();
         return aa < bb ? -1 : (aa > bb ? 1 : 0);
     });
-
     marks=[]; // для оценок
     for (let j = 0; j < lessons[i][1].length; j++){
       marks.push(lessons[i][1][j][0]); // добавление оценкок
     };
     addElement(String(lessons[i][0]),String(lessons[i][2]),String(marks).replace(/,/g,', ')); // вывод в таблицу
   };
+  $('#maintable tbody').append('<tr class="lessons"><td>Общий Ср.Балл</td><td style="font-size:18px" id="Avr">'+calcAvrAvr()+'</td></tr>'); 
+  //добавление последней строки с общим баллом
 };
 
 
@@ -315,12 +321,8 @@ function clearTable(){//очищение таблицы (используетс�
 function addElement(a,b,c){ // добавление в таблицу
   $('#maintable tbody').append('<tr class="lessons"><td>'+a+'</td><td id="'+a+'">'+b+'</td><td><input value="'+String(c)+'" type="text" id="'+a+'" class="input"><div class="input-buffer"></div></td></tr>'); 
 };
-
-
 </script>
-
 </body>
-
 `
 
 head=`
